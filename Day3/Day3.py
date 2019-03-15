@@ -44,8 +44,17 @@ def main():
         if len(used_inches[key]) > 1: 
             total_overlapped_inches += 1
 
-    print(total_overlapped_inches)
+    print(f"Total overlapped inches: {total_overlapped_inches}")
 
+    claim_numbers = [i.claim_no for i in claims]
+
+    for key in used_inches.keys(): 
+        if len(used_inches[key]) > 1: 
+            for item in used_inches[key]: 
+                if item.claim_no in claim_numbers: 
+                    claim_numbers.remove(item.claim_no)
+    
+    print(f"Non-overlapping claim numbers {claim_numbers[0]}")
 
 if __name__ == "__main__":
     main()
