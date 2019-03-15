@@ -11,9 +11,9 @@ class claim:
         self.width = int(match.groups()[3])
         self.height = int(match.groups()[4])
         self.used_coords = set()
-        self.get_used_coords()
+        self.__set_used_coords()
 
-    def get_used_coords(self):
+    def __set_used_coords(self):
         for row in range(self.from_left, self.from_left + self.width): 
             for col in range(self.from_top, self.from_top + self.height):
                 self.used_coords.add((row,col)) 
