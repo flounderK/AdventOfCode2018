@@ -28,7 +28,7 @@ class guard:
     def get_minutes_of_sleep(self, start, duration_delta):
         """takes in datetime objects"""
         duration_minutes = duration_delta.seconds / 60
-        for minute in range(0, math.floor(duration_minutes) - 1):
+        for minute in range(0, math.floor(duration_minutes)):
             minute_asleep = (start + datetime.timedelta(minutes=minute)).minute
             if self.minutes_spent_asleep.get(minute_asleep) is None:
                 self.minutes_spent_asleep[minute_asleep] = 1
@@ -60,7 +60,7 @@ class guard:
         return self.number
 
 
-with open("Day4In.txt", "r") as f: 
+with open("Day4In.txt", "r") as f:
     content = [i.replace("\n", "") for i in f.readlines()]
 
 
@@ -82,4 +82,25 @@ for key in guards.keys():
     guards[key].collect_sleep_data()
 
 
+best_guard_no_choice = 0
+greatest_total_sleep = 0
+for guard in guards.keys():
+    if guards[guard].total_sleep_minutes > greatest_total_sleep:
+        greatest_total_sleep = guards[guard].total_sleep_minutes
+        best_guard_no_choice = guards[guard]
+
+print(f"Guard number: {best_guard_no_choice}")
+
+best_minute_choice = 0
+highest_sleep_count = 0
+for minute in guards[best_guard_no_choice.number].minutes_spent_asleep.keys():
+    current_minute_count = guards[best_guard_no_choice.number].minutes_spent_asleep[minute]
+    if current_minute_count > highest_sleep_count:
+        best_minute_choice = minute
+        highest_sleep_count = current_minute_count
+
+
+print(f"Best minute: {best_minute_choice}")
+answer = best_minute_choice * int(best_guard_no_choice.number)
+print(f"Answer: {best_guard_no_choice.number} x {best_minute_choice} = {answer}")
 
