@@ -1,6 +1,6 @@
 import re
 import datetime 
-
+import math
 
 class record:
     def __init__(self, record_string):
@@ -22,6 +22,18 @@ class guard:
         self.records = list()
         self.average_sleep_length = None
         self.total_sleep_minutes = 0
+        # only minute matters, not hour
+        self.minutes_spent_asleep = dict()
+
+    def get_minutes_of_sleep(self, start, duration_delta):
+        """takes in datetime objects"""
+        duration_minutes = duration_delta.seconds / 60
+        for minute in range(0, math.floor(duration_minutes) - 1):
+            minute_asleep = (start + datetime.timedelta(minutes=minute)).minute
+            if self.minutes_spent_asleep.get(minute_asleep) is None:
+                self.minutes_spent_asleep[minute_asleep] = 1
+            else:
+                self.minutes_spent_asleep[minute_asleep] += 1
 
     def collect_sleep_data(self):
         sleep_start = None
@@ -33,6 +45,7 @@ class guard:
                 sleep_end = rec.datetime
             if sleep_start is not None and sleep_end is not None:
                 self.sleep_lengths.append(sleep_end - sleep_start)
+                self.get_minutes_of_sleep(sleep_start, (sleep_end - sleep_start))
                 sleep_start = None
                 sleep_end = None
         
