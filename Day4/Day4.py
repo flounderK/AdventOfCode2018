@@ -104,3 +104,19 @@ print(f"Best minute: {best_minute_choice}")
 answer = best_minute_choice * int(best_guard_no_choice.number)
 print(f"Answer: {best_guard_no_choice.number} x {best_minute_choice} = {answer}")
 
+highest_sleep_count = 0
+guard_num = 0
+most_slept_minute = 0
+for guard in guards.keys():
+    for minute in guards[guard].minutes_spent_asleep.keys():
+        current_minute_count = guards[guard].minutes_spent_asleep[minute]
+        if current_minute_count > highest_sleep_count:
+            highest_sleep_count = current_minute_count
+            most_slept_minute = minute
+            guard_num = guards[guard].number
+
+print("")
+print(f"Guard number: {guard_num}")
+print(f"Best minute: {most_slept_minute}")
+answer = most_slept_minute * int(guard_num)
+print(f"Answer: {guard_num} x {most_slept_minute} = {answer}")
