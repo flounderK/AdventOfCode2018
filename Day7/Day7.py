@@ -1,4 +1,57 @@
 import re
+import string
+
+
+class Worker:
+    ORDER_STRING = ""
+
+    def __init__(self, number):
+        self.number = number
+        self.working_on = ""
+        self.working = False
+        self.task_finished_time = 0
+        self.time = 0
+
+    def start_work(self, step):
+        self.working_on = step
+        self.working = True
+        self.task_finished_time = self.time + (string.ascii_uppercase.find(step) + 1)
+
+    def tick(self):
+        self.time += 1
+        if self.working is True and self.task_finished_time == self.time:
+            self.task_finished_time = 0
+            self.working = False
+            Worker.ORDER_STRING += self.working_on
+            self.working_on = ""
+
+
+class WorkerPool:
+    def __init__(self, number_of_workers):
+        self.max_workers = number_of_workers
+        self.elapsed_time = 0
+        self.worker_available = True
+        self.workers = list()
+        self.create_workers()
+
+    def create_workers(self):
+        for i in range(1, self.max_workers + 1):
+            self.workers.append(Worker(i))
+
+    def find_available_worker(self):
+        for i in self.workers:
+            if i.working is False:
+                return i
+
+    def tick(self):
+        available_count = 0
+        for i in self.workers:
+            i.tick()
+            if i.working is False:
+                available_count += 1
+        if available_count < 1:
+            self.worker_available = False
+
 
 with open("Day7In.txt", "r") as f:
     content = [i.replace("\n", "") for i in f.readlines()]
@@ -35,7 +88,6 @@ for checked_step in all_steps:
     for step in relationships_dependents.keys():
         if checked_step in relationships_dependents[step]:
             dependent_of_relationships[checked_step].add(step)
-
 
 
 current_step = sorted(first_steps)[0]
