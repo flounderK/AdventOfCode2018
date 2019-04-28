@@ -38,11 +38,15 @@ while not last_marble_placed:
 
         if marble_count % 23 == 0:
             player.points += marble_count
-            marble_to_remove = marbles[current_marble_position - 7]
+            offset_index = -7
+            if current_marble_position < 7:
+                offset_index = offset_index - 1
+
+            marble_to_remove = marbles[current_marble_position + offset_index]
 
             player.points += marble_to_remove
             marbles.remove(marble_to_remove)
-            current_marble_position = marbles.index(marbles[current_marble_position - 6])
+            current_marble_position = marbles.index(marbles[current_marble_position + offset_index])
             # 7 marbles counter clockwise, remove and add to score
         elif len(marbles) == 1 or current_marble_position == (len(marbles) - 2):
             marbles.append(new_marble)
