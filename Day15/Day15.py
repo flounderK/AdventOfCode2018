@@ -15,6 +15,8 @@ class Character(ABC):
         self.in_range_squares = list()
         self.register()
         self.associated_game = None
+        self.hit_points = 200
+        self.attack_power = 3
 
     def register_associated_game(self, game):
         self.associated_game = game
@@ -24,8 +26,17 @@ class Character(ABC):
         assert self.target_is_adjacent(*location)
         self.x, self.y = location
 
-    def attack(self):
-        pass
+    def attack(self, other):
+        """attack the other character specified"""
+        other.take_damage(self.attack_power)
+
+    def take_damage(self, attack_power):
+        self.hit_points -= attack_power
+        if self.hit_points < 1:
+            self._die()
+
+    def _die(self):
+        self.deregister()
 
     def find_path_to_adjacent_location(self, x, y):
         """Method to be used to locate a reachable path that will put character in an adjacent
@@ -251,6 +262,11 @@ class Game(object):
         all_characters = Character.get_all_subclass_instances()
         Character.prioritize(all_characters)
         return all_characters
+
+    def tick(self):
+        round_order = self.determine_rount_order()
+        for char in round_order:
+            char.take_turn()
 
     def __repr__(self):
         return "\n".join(["".join(y) for y in self.get_current_grid()])
