@@ -20,7 +20,9 @@ class Character(ABC):
         self.associated_game = game
 
     def move(self, location):
-        pass
+        """Move to location, Error if specified location is not adjacent"""
+        assert self.target_is_adjacent(*location)
+        self.x, self.y = location
 
     def attack(self):
         pass
@@ -74,7 +76,9 @@ class Character(ABC):
             path.append(location)
             # print("\n".join(["".join(y) for y in self.associated_game.get_current_grid(path)]))
         path_options.sort(key=lambda a: len(a))
-        return [i for i in path_options if len(i) <= len(path_options[0])]
+        path_options = [i for i in path_options if len(i) <= len(path_options[0])]
+        # TODO: prioritize paths iteratively
+        return path_options[0]
 
     def get_valid_adjacent_locations(self, x, y):
         return [i for i in self.__class__.get_adjacent_locations(x, y) if self.is_empty_location(i) is True]
@@ -120,6 +124,7 @@ class Character(ABC):
             self.move(target_location)
 
     def __init_subclass__(cls, **kwargs):
+        """Keep a record of all of the subclass types"""
         if cls not in cls.registry:
             cls.registry.add(cls)
         super().__init_subclass__(**kwargs)
@@ -225,6 +230,8 @@ class Game(object):
         return empty_grid
 
     def get_current_grid(self, path=None):
+        """Get the Game's current grid state. Passing in a list of tuples (x, y)
+        will print those out as well."""
         grid = self.empty_grid.copy()
         # grid = ["".join(grid[y]) for y in grid]
         if path is not None:
@@ -256,5 +263,5 @@ if __name__ == "__main__":
 
     e = Elf.CHARACTERS[0]
     g = Goblin.CHARACTERS[0]
-    
+
 
