@@ -34,7 +34,9 @@ class Character(ABC):
         path = [location]
         adjacency_tree = dict()
         fin = False
+        pop_and_cont = False
         while fin is not True:
+            pop_and_cont = False
             current_lookup_val = "".join(path.__repr__())
             if adjacency_tree.get(current_lookup_val) is None:
                 adjacency_tree[current_lookup_val] = self.get_valid_adjacent_locations(*location)
@@ -49,23 +51,18 @@ class Character(ABC):
 
             if len(valid_adjacent_locations) < 1:
                 # no more moves, back out one and continue
-                last_loc = location
-                path.pop()
-                last_lookup_val = "".join(path.__repr__())
-                location = path[-1]
-                adjacency_tree[last_lookup_val].remove(last_loc)
-                continue
+                pop_and_cont = True
 
             if location in target_locations:
+                # success, add path to return value
                 path_options.append(path.copy())
-                last_loc = location
-                path.pop()
-                last_lookup_val = "".join(path.__repr__())
-                location = path[-1]
-                adjacency_tree[last_lookup_val].remove(last_loc)
-                continue
+                pop_and_cont = True
 
             if len(path_options) >= 1 and len(path) > len(sorted(path_options, key=lambda a: len(a))[0]):
+                # prune off paths that are larger than the shortest path
+                pop_and_cont = True
+
+            if pop_and_cont is True:
                 last_loc = location
                 path.pop()
                 last_lookup_val = "".join(path.__repr__())
@@ -259,5 +256,5 @@ if __name__ == "__main__":
 
     e = Elf.CHARACTERS[0]
     g = Goblin.CHARACTERS[0]
-    print(e.get_enemies())
+    
 
