@@ -35,14 +35,13 @@ class Character(ABC):
         adjacency_tree = dict()
         fin = False
         while fin is not True:
-            if adjacency_tree.get(location) is None:
-                adjacency_tree[location] = self.get_valid_adjacent_locations(*location)
+            current_lookup_val = "".join(path.__repr__())
+            if adjacency_tree.get(current_lookup_val) is None:
+                adjacency_tree[current_lookup_val] = self.get_valid_adjacent_locations(*location)
                 for path_loc in path:
-                    if path_loc in adjacency_tree[location]:
-                        # valid_adjacent_locations = adjacency_tree[location].copy()
-                        # valid_adjacent_locations.remove(location)
-                        adjacency_tree[location].remove(path_loc)
-            valid_adjacent_locations = adjacency_tree[location]
+                    if path_loc in adjacency_tree[current_lookup_val]:
+                        adjacency_tree[current_lookup_val].remove(path_loc)
+            valid_adjacent_locations = adjacency_tree[current_lookup_val]
             if len(path) == 1 and len(valid_adjacent_locations) < 1:
                 # end turn, no more moves
                 fin = True
@@ -52,30 +51,33 @@ class Character(ABC):
                 # no more moves, back out one and continue
                 last_loc = location
                 path.pop()
+                last_lookup_val = "".join(path.__repr__())
                 location = path[-1]
-                adjacency_tree[location].remove(last_loc)
+                adjacency_tree[last_lookup_val].remove(last_loc)
                 continue
 
             if location in target_locations:
                 path_options.append(path.copy())
                 last_loc = location
                 path.pop()
+                last_lookup_val = "".join(path.__repr__())
                 location = path[-1]
-                adjacency_tree[location].remove(last_loc)
+                adjacency_tree[last_lookup_val].remove(last_loc)
                 continue
 
-            if len(path_options) >= 1 and len(path) > len(path_options[0]):
+            if len(path_options) >= 1 and len(path) > len(sorted(path_options, key=lambda a: len(a))[0]):
                 last_loc = location
                 path.pop()
+                last_lookup_val = "".join(path.__repr__())
                 location = path[-1]
-                adjacency_tree[location].remove(last_loc)
+                adjacency_tree[last_lookup_val].remove(last_loc)
                 continue
 
             location = valid_adjacent_locations[0]
             path.append(location)
-            print("\n".join(["".join(y) for y in self.associated_game.get_current_grid(path)]))
+            # print("\n".join(["".join(y) for y in self.associated_game.get_current_grid(path)]))
         path_options.sort(key=lambda a: len(a))
-        return path_options
+        return [i for i in path_options if len(i) <= len(path_options[0])]
 
     def get_valid_adjacent_locations(self, x, y):
         return [i for i in self.__class__.get_adjacent_locations(x, y) if self.is_empty_location(i) is True]
