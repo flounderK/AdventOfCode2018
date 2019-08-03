@@ -89,7 +89,7 @@ class Character(ABC):
         path_options.sort(key=lambda a: len(a))
         path_options = [i for i in path_options if len(i) <= len(path_options[0])]
         # TODO: prioritize paths iteratively
-        return path_options[0]
+        return prioritize_path(path_options)
 
     def get_valid_adjacent_locations(self, x, y):
         return [i for i in self.__class__.get_adjacent_locations(x, y) if self.is_empty_location(i) is True]
@@ -113,7 +113,7 @@ class Character(ABC):
 
     def choose_target(self):
         potential_targets = self.find_targets()
-        self.__class__.prioritize(potential_targets)
+        prioritize_characters(potential_targets)
         adjacent_targets = [t for t in potential_targets if self.target_is_adjacent(t.x, t.y) is True]
         if len(adjacent_targets) > 0:
             target = adjacent_targets[0]
@@ -144,11 +144,6 @@ class Character(ABC):
     def get_all_subclass_instances(cls):
         return [item for sublist in [i.CHARACTERS for i in [c for c in cls.registry]]
                 for item in sublist]
-
-    @staticmethod
-    def prioritize(chars):
-        """organize in reading order"""
-        chars.sort(key=operator.attrgetter("y", "x"))
 
     def get_location(self):
         return self.x, self.y
@@ -216,6 +211,34 @@ def manhattan_distance(l1, l2):
     return abs(abs(l1[0] - l2[0]) + abs(l1[1] - l2[1]))
 
 
+def prioritize_characters(chars):
+    """organize in reading order"""
+    chars.sort(key=operator.attrgetter("y", "x"))
+
+
+def prioritize_path(paths: list):
+    divergent_ind = None
+    divergent_path_ind = None
+    for ind, locs in enumerate(zip(*paths)):
+        default_loc_for_ind = locs[0]
+        for loc in locs:
+            if loc != default_loc_for_ind:
+                # find the first index where there are differing locations
+                divergent_ind = ind
+                break
+        if divergent_ind is not None:
+            # choose the first of the locations in reading order
+            # vv this right here decides reading order, change if broken vv
+            optimal_location_at_divergence = sorted(list(locs), key=lambda a: (a[1], a[0]))[0]
+            number_of_remaining_paths = len([i for i in list(locs) if i == optimal_location_at_divergence])
+            optimal_paths = [p for i, p in enumerate(paths) if paths[i][ind] == optimal_location_at_divergence]
+            if number_of_remaining_paths == 1:
+                return optimal_paths[0]
+            else:
+                # recursively call this function until only one path remains
+                return prioritize_path(optimal_paths)
+
+
 class Game(object):
     def __init__(self, grid):
         self.data = defaultdict(list)
@@ -244,7 +267,8 @@ class Game(object):
         """Get the Game's current grid state. Passing in a list of tuples (x, y)
         will print those out as well."""
         grid = self.empty_grid.copy()
-        # grid = ["".join(grid[y]) for y in grid]
+        for y, row in enumerate(grid):
+            grid[y] = "".join(grid[y])
         if path is not None:
             for x, y in path:
                 grid[y] = "".join(grid[y])
@@ -256,11 +280,14 @@ class Game(object):
             grid[y] = grid[y][:x] + char.__repr__() + grid[y][x + 1:]
         return grid
 
+    def print_current_grid(self, path=None):
+        print("\n".join(self.get_current_grid(path)))
+
     @staticmethod
     def determine_rount_order():
         """Who makes a move and when"""
         all_characters = Character.get_all_subclass_instances()
-        Character.prioritize(all_characters)
+        prioritize_characters(all_characters)
         return all_characters
 
     def tick(self):
@@ -273,11 +300,13 @@ class Game(object):
 
 
 if __name__ == "__main__":
-    with open("Day15InPathfindingTest.txt", "r") as f:
+    with open("Day15In.txt", "r") as f:
         content = f.read().splitlines()
     game = Game(content)
 
     e = Elf.CHARACTERS[0]
-    g = Goblin.CHARACTERS[0]
+    g = Goblin.CHARACTERS[1]
+
+
 
 
