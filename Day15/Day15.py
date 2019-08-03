@@ -94,7 +94,7 @@ class Character(ABC):
         path_options.sort(key=lambda a: len(a))
         path_options = [i for i in path_options if len(i) <= len(path_options[0])]
         # TODO: prioritize paths iteratively
-        return prioritize_path(path_options)
+        return path_options
 
     def get_valid_adjacent_locations(self, x, y):
         return [i for i in self.__class__.get_adjacent_locations(x, y) if self.is_empty_location(i) is True]
@@ -105,8 +105,7 @@ class Character(ABC):
     @staticmethod
     def get_adjacent_locations(x, y):
         """return all locations that are adjacent to the one specified"""
-        return [(x + o, y + n) for o, n in
-                [i for b in itertools.permutations([(0, 0), (-1, 1)]) for i in zip(*b)]]
+        return [(x + o, y + n) for o, n in [(-1, 0), (1, 0), (0, -1), (0, 1)]]
 
     def is_empty_location(self, location):
         if location in [i.get_location() for i in self.__class__.get_all_subclass_instances()]:
@@ -138,7 +137,9 @@ class Character(ABC):
         if self.target_is_adjacent(*target.get_location()) is True:
             self.attack(target)
         else:
-            mov_loc = self.find_path_to_adjacent_location(*target.get_location())[0]
+            paths = self.find_path_to_adjacent_location(*target.get_location())
+            optimal_path = prioritize_path(paths)
+            mov_loc = optimal_path[0]
             self.move(mov_loc)
 
     def __init_subclass__(cls, **kwargs):
@@ -291,7 +292,7 @@ class Game(object):
         print("\n".join(self.get_current_grid(path)))
 
     @staticmethod
-    def determine_rount_order():
+    def determine_round_order():
         """Who makes a move and when"""
         all_characters = Character.get_all_subclass_instances()
         prioritize_characters(all_characters)
@@ -311,8 +312,10 @@ if __name__ == "__main__":
         content = f.read().splitlines()
     game = Game(content)
 
-    e = Elf.CHARACTERS[0]
-    g = Goblin.CHARACTERS[1]
+    round_order = game.determine_round_order()
+    g = [c for c in round_order if isinstance(c, Goblin) is True][0]
+    e = [c for c in round_order if isinstance(c, Elf) is True][0]
+
 
 
 
