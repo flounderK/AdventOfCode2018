@@ -17,6 +17,7 @@ class Character(ABC):
         self.associated_game = None
         self.hit_points = 200
         self.attack_power = 3
+        self.alive = True
 
     def register_associated_game(self, game):
         self.associated_game = game
@@ -38,6 +39,9 @@ class Character(ABC):
 
     def _die(self):
         self.deregister()
+        # adding this here so that turn order has something to check before letting a
+        # dead elf take their turn
+        self.alive = False
 
     def find_path_to_adjacent_location(self, x, y):
         """Method to be used to locate a reachable path that will put character in an adjacent
