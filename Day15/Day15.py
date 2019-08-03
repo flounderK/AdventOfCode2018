@@ -24,7 +24,8 @@ class Character(ABC):
     def move(self, location):
         """Move to location, Error if specified location is not adjacent"""
         assert self.target_is_adjacent(*location)
-        self.x, self.y = location
+        if self.is_empty_location(location) is True:
+            self.x, self.y = location
 
     def attack(self, other):
         """attack the other character specified"""
@@ -113,13 +114,14 @@ class Character(ABC):
 
     def choose_target(self):
         potential_targets = self.find_targets()
+        # this should order things correctly for the list comprehension too
         prioritize_characters(potential_targets)
         adjacent_targets = [t for t in potential_targets if self.target_is_adjacent(t.x, t.y) is True]
         if len(adjacent_targets) > 0:
             target = adjacent_targets[0]
-            return target.x, target.y
+            return target
         target = potential_targets[0]
-        return target.x, target.y
+        return target
 
     def target_is_adjacent(self, x, y):
         if (x, y) in self.get_adjacent_locations(*self.get_location()):
@@ -128,11 +130,12 @@ class Character(ABC):
             return False
 
     def take_turn(self):
-        target_location = self.choose_target()
-        if self.target_is_adjacent(*target_location) is True:
-            self.attack()
+        target = self.choose_target()
+        if self.target_is_adjacent(*target.get_location()) is True:
+            self.attack(target)
         else:
-            self.move(target_location)
+            mov_loc = self.find_path_to_adjacent_location(*target.get_location())[0]
+            self.move(mov_loc)
 
     def __init_subclass__(cls, **kwargs):
         """Keep a record of all of the subclass types"""
