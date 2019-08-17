@@ -39,3 +39,6 @@ for x in range(min_x, max_x):
 
 largest_area_coord = sorted([t for t in territory_dict.keys()], key=lambda t: len(territory_dict[t]))[-1]
 print(f"Part 1: {len(territory_dict[largest_area_coord])}")
+viable_locations = sorted([k for k, v in global_distance_dict.items() if v < 10000],
+                          key=lambda k: global_distance_dict[k])
+print(f"Part 2: {len(viable_locations)}")
